@@ -18,32 +18,30 @@ type Scrapper struct {
 
 func New(baseURL string, onScraped OnScrapedCallback) *Scrapper {
 	scrapper := &Scrapper{
+		collector:         colly.NewCollector(),
 		baseURL:           baseURL,
 		OnScrapedCallback: onScraped,
 		parsedData:        make([]string, 0),
-		collector:         colly.NewCollector(),
 	}
+
+	scrapper.collector.OnHTML("a.pagination-holder-next", func(e *colly.HTMLElement) {
+		e.Request.Visit(e.Attr("href"))
+	})
+
+	scrapper.collector.OnHTML("div.holder-body", func(h *colly.HTMLElement) {
+		scrapper.parsedData = append(scrapper.parsedData, h.ChildTexts("p")...)
+	})
+
+	scrapper.collector.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL)
+	})
 
 	return scrapper
 }
 
 func (s *Scrapper) Parse(path string) {
-	var wg sync.WaitGroup
-
-	s.collector.OnHTML("a.pagination-holder-next", func(e *colly.HTMLElement) {
-		e.Request.Visit(e.Attr("href"))
-	})
-
-	s.collector.OnHTML("div.holder-body", func(h *colly.HTMLElement) {
-		s.parsedData = append(s.parsedData, h.ChildTexts("p")...)
-	})
-
-	s.collector.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
-	})
-
+	wg := sync.WaitGroup{}
 	s.collector.Visit(s.baseURL + path)
-
 	wg.Wait()
 
 	s.OnScrapedCallback(path, s.parsedData)

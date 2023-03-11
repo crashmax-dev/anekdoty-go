@@ -10,10 +10,12 @@ import (
 )
 
 func main() {
+	categories := []string{"pro-1-aprelja", "pro-programmistov", "pro-mobilizaciyu"}
 	scrapper := scrapper.New("https://anekdoty.ru/", onScraped)
 
-	scrapper.Parse("pro-programmistov")
-	scrapper.Parse("pro-mobilizaciyu")
+	for _, category := range categories {
+		scrapper.Parse(category)
+	}
 }
 
 func onScraped(path string, scrapedData []string) {
