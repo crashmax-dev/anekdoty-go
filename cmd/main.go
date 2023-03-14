@@ -29,5 +29,5 @@ func onScraped(path string, scrapedData []string) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Saved %d items to data/%v.json\n", len(scrapedData), path)
+	fmt.Printf("Saved %d items to data/%v.json\n\n", len(scrapedData), path)
 }

@@ -2,7 +2,6 @@ package scrapper
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/gocolly/colly/v2"
 )
@@ -40,10 +39,7 @@ func New(baseURL string, onScraped OnScrapedCallback) *Scrapper {
 }
 
 func (s *Scrapper) Parse(path string) {
-	wg := sync.WaitGroup{}
 	s.collector.Visit(s.baseURL + path)
-	wg.Wait()
-
 	s.OnScrapedCallback(path, s.parsedData)
 	s.parsedData = make([]string, 0)
 }
